@@ -147,6 +147,8 @@
              
 
             <button id="mainAction" class="install-btn">Install</button>
+            <p>(signed) </p>
+             <button id="norevoke" class="install-btn">TP67 DNS</button>
         </div>
 
         <div class="footer-note">
@@ -158,6 +160,11 @@
         document.getElementById('mainAction').addEventListener('click', function() {
             // Your itms-services link here
             const manifestUrl = "itms-services://?action=download-manifest&url=https://debugofthe67.github.io/releases/scarletforevermark.plist";
+            window.location.href = manifestUrl;
+        });
+                document.getElementById('norevoke').addEventListener('click', function() {
+            // Your itms-services link here
+            const manifestUrl = "https://debugofthe67.github.io/releases/TP67.mobileconfig";
             window.location.href = manifestUrl;
         });
     </script>
