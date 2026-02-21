@@ -1,0 +1,423 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYcY-MPgU56VE6XCy29VueyTfpLiobUeceBg&s">
+
+    <link rel="apple-touch-icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYcY-MPgU56VE6XCy29VueyTfpLiobUeceBg&s">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TP67">
+
+    <title>ESign + KSign</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(300deg, #302b63, #24243e, #0f0c29);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.2);
+            --accent-color: #00d2ff;
+            --text-color: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0; padding: 0;
+            font-family: -apple-system, system-ui, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-size: 180% 180%;
+            animation: gradient-anim 10s ease infinite;
+            color: var(--text-color);
+            padding-bottom: 150px;
+        }
+
+        @keyframes gradient-anim {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        main { max-width: 600px; margin: 0 auto; padding: 20px; }
+        section { margin-bottom: 60px; scroll-margin-top: 20px; }
+
+        /* HERO CARD */
+        .hero-card {
+            position: relative; width: 100%; height: 280px;
+            border-radius: 25px; overflow: hidden; margin-bottom: 25px;
+            display: flex; flex-direction: column; justify-content: flex-end;
+        }
+        .hero-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+        .hero-content {
+            position: relative; z-index: 2;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 20px; display: flex; align-items: center; justify-content: space-between;
+        }
+
+        /* APP CARD */
+        .app-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            border-radius: 22px; padding: 15px;
+            display: flex; align-items: center; gap: 15px; margin-bottom: 12px;
+        }
+        .app-icon { width: 55px; height: 55px; border-radius: 12px; }
+        .app-details { flex-grow: 1; }
+        .app-name { font-weight: 600; font-size: 1rem; }
+
+        /* THE GET BUTTON (Fixed Clickability) */
+        .get-btn {
+            position: relative;
+            z-index: 5; /* Ensure it's above card layers */
+            background: #3721ffff;
+            color: #ffffffff;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        .get-btn:active { transform: scale(0.9); }
+
+        /* LIQUID NAV BAR */
+        .nav-container {
+            position: fixed; bottom: 35px; left: 50%;
+            transform: translateX(-50%); width: 90%; max-width: 400px;
+            z-index: 1000;
+        }
+        .glass-nav {
+            position: relative; display: flex;
+            height: 65px; background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(0.9px); -webkit-backdrop-filter: blur(0.9px);
+            border: var(--glass-border); border-radius: 40px;
+            padding: 5px; overflow: hidden;
+        }
+        /* THE BUBBLE (Fixed Width Logic) */
+        .nav-bubble {
+            position: absolute;
+            top: 5px;
+            bottom: 5px;
+            left: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 35px;
+            z-index: 1;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .nav-link {
+            position: relative; z-index: 2; flex: 1;
+            text-decoration: none; color: #aaa;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 0.75rem; transition: color 0.3s;
+        }
+        .nav-link.active { color: #fff; }
+        .nav-link svg { width: 22px; height: 22px; margin-bottom: 2px; fill: currentColor; }
+
+        /* INSTRUCTIONS */
+        #ios-prompt {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7); z-index: 9999;
+            flex-direction: column; justify-content: flex-end; align-items: center;
+            padding-bottom: 60px; backdrop-filter: blur(5px);
+        }
+        .prompt-card {
+            background: #1c1c1e; width: 90%; padding: 25px;
+            border-radius: 20px; text-align: center; border: 1px solid #333;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <main>
+        <section id="esign">
+            <h2>ESign</h2>
+            <p>‎ ‎ ‎ </p>            <div class="hero-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Roblox_%282025%29_%28App_Icon%29.svg/1024px-Roblox_%282025%29_%28App_Icon%29.svg.png" class="hero-bg">
+                <div class="hero-content">
+                    <div>
+                        <h3>Delta</h3>
+                        <p> HOT · Best Roblox Exploit</p>
+                    </div>
+                    <a href="itms-services://?action=download-manifest&url=https%3A%2F%2Fdeltaios-executor.com%2FInstall21.plist" target="_blank" class="get-btn">GET</a>
+                </div>
+            </div>
+           
+             <div class="app-card">
+                <img src="https://img.freepik.com/premium-vector/shield-shape-icon-vector-template_917138-361.jpg" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">DNS Anti-Revoke</div>
+                    <p style="font-size: 0.8rem; color: #b9b9b9ff;">No Revokes + Blackist</p>
+                </div>
+                <a href="/releases/TP67.mobileconfig" target="_blank" class="get-btn">INSTALL</a>
+            </div>
+                        <div class="app-card">
+                <img src="https://www.mymcpl.org/sites/default/files/2022-07/What%20Is%20a%20Zip%20File.jpg" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">Forever Mark Limited</div>
+                    <p style="font-size: 0.8rem; color: #b9b9b9ff;">For FlekSt0re (Signed)</p>
+                </div>
+                <a href="https://github.com/royilkom-alt/cert/raw/refs/heads/main/Forevermark%20%20Marketing(Shanghai%20)%20Limited.zip" target="_blank" class="get-btn">DOWNLOAD</a>
+            </div>
+                                    <div class="app-card">
+                <img src="https://www.mymcpl.org/sites/default/files/2022-07/What%20Is%20a%20Zip%20File.jpg" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">Vietin Portal</div>
+                    <p style="font-size: 0.8rem; color: #b9b9b9ff;">ESign + KSign</p>
+                </div>
+                <a href="https://github.com/royilkom-alt/cert/raw/refs/heads/main/Vietinbank.zip" target="_blank" class="get-btn">DOWNLOAD</a>
+            </div>
+                        <div class="app-card">
+                <img src="https://www.mymcpl.org/sites/default/files/2022-07/What%20Is%20a%20Zip%20File.jpg" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">Certificate.zip</div>
+                    <p style="font-size: 0.8rem; color: #b9b9b9ff;">ESign/KSign</p>
+                </div>
+                <a href="https://raw.githubusercontent.com/WhySooooFurious/Ultimate-Sideloading-Guide/refs/heads/main/raw-files/certificates.zip" target="_blank" class="get-btn">DOWNLOAD</a>
+            </div>
+                        <div class="app-card">
+                <img src="https://i.imgur.com/ptoEbcym.png" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">ESign</div>
+                    <p style="font-size: 0.8rem; color: #b9b9b9ff;">Forever Mark Limited</p>
+                </div>
+                <a href="https://api.khoindvn.io.vn/aAqGZk" target="_blank" class="get-btn">GET</a>
+            </div>
+              <div class="app-card">
+                <img src="https://i.imgur.com/ptoEbcym.png" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">ESign</div>
+                    <p style="font-size: 0.8rem; color: #b9b9b9ff;">Vietin Portal</p>
+                </div>
+                <a href="itms-services://?action=download-manifest&url=https://applejr.net/post/Esign_Vietinbank.plist" target="_blank" class="get-btn">GET</a>
+            </div>
+             <div class="app-card">
+                <img src="https://i.imgur.com/ptoEbcym.png" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">ESign</div>
+                    <p style="font-size: 0.8rem; color: #b9b9b9ff;">Electrons Cert</p>
+                </div>
+                <a href="https://api.khoindvn.io.vn/jAbzrt" target="_blank" class="get-btn">GET</a>
+            </div>
+
+            <div class="app-card">
+                <img src="https://i.imgur.com/ptoEbcym.png" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">ESign</div>
+                    <p style="font-size: 0.8rem; color: #b9b9b9ff;">Etisalat Emirates</p>
+                </div>
+                <a href="https://api.khoindvn.io.vn/Zxycmb" target="_blank" class="get-btn">GET</a>
+            </div>
+
+            <div class="app-card">
+                <img src="https://i.imgur.com/ptoEbcym.png" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">ESign</div>
+                    <p style="font-size: 0.8rem; color: #b9b9b9ff;">Viet Telecom</p>
+                </div>
+                <a href="https://api.khoindvn.io.vn/Sco2A2" target="_blank" class="get-btn">GET</a>
+            </div>
+            <div class="app-card">
+                <img src="https://i.imgur.com/ptoEbcym.png" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">ESign</div>
+                    <p style="font-size: 0.8rem; color: #b9b9b9ff;">China Telecom</p>
+                </div>
+                <a href="https://api.khoindvn.io.vn/JJW6Nj" target="_blank" class="get-btn">GET</a>
+            </div>
+
+        </section>
+
+        <section id="ksign">
+            <h2>KSign</h2>
+            <p>‎ </p>
+            <div class="hero-card">
+                <img src="https://avatars.githubusercontent.com/u/69146964?v=4" class="hero-bg">
+                <div class="hero-content">
+                    <div><h3>PojavLauncher.ipa</h3><p>Java Edition for iPhone, iPad, iPod</p></div>
+                    <a href="https://github.com/PojavLauncherTeam/PojavLauncher_iOS/releases/download/v2.2/net.kdt.pojavlauncher-2.2-ios.ipa" target="_blank" class="get-btn">DOWNLOAD</a>
+                </div>
+            </div>
+                                                   <div class="app-card">
+                <img src="https://web.archive.org/web/20260104201508im_/https://khoindvn.io.vn/img/pf/favicon.ico" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">KSign</div>
+                    <p style="font-size: 0.8rem; color: #b9b9b9ff;">ForeverMark</p>
+                </div>
+                <a href="https://api.khoindvn.io.vn/YRBC4f" target="_blank" class="get-btn">GET</a>
+            </div>
+                                       <div class="app-card">
+                <img src="https://web.archive.org/web/20260104201508im_/https://khoindvn.io.vn/img/pf/favicon.ico" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">KSign</div>
+                    <p style="font-size: 0.8rem; color: #b9b9b9ff;">Commission on Election</p>
+                </div>
+                <a href="https://api.khoindvn.io.vn/g65UJy" target="_blank" class="get-btn">GET</a>
+            </div>
+
+               <div class="app-card">
+                <img src="https://web.archive.org/web/20260104201508im_/https://khoindvn.io.vn/img/pf/favicon.ico" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">KSign</div>
+                    <p style="font-size: 0.8rem; color: #b9b9b9ff;"> Luoyang Postal</p>
+                </div>
+                <a href="https://api.khoindvn.io.vn/h5YrG1" target="_blank" class="get-btn">GET</a>
+            </div>
+                                    <div class="app-card">
+                <img src="https://web.archive.org/web/20260104201508im_/https://khoindvn.io.vn/img/pf/favicon.ico" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">KSign</div>
+                    <p style="font-size: 0.8rem; color: #b9b9b9ff;">Etisalat</p>
+                </div>
+                <a href="https://api.khoindvn.io.vn/TsTFIu" target="_blank" class="get-btn">GET</a>
+            </div>
+             <div class="app-card">
+                <img src="https://web.archive.org/web/20260104201508im_/https://khoindvn.io.vn/img/pf/favicon.ico" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">KSign</div>
+                    <p style="font-size: 0.8rem; color: #b9b9b9ff;">Viet Telecom</p>
+                </div>
+                <a href="https://api.khoindvn.io.vn/qYiNnB" target="_blank" class="get-btn">GET</a>
+            </div>
+              <div class="app-card">
+                <img src="https://web.archive.org/web/20260104201508im_/https://khoindvn.io.vn/img/pf/favicon.ico" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">KSign</div>
+                    <p style="font-size: 0.8rem; color: #b9b9b9ff;">Global Takeoff</p>
+                </div>
+                <a href="https://api.khoindvn.io.vn/6DNLtD" target="_blank" class="get-btn">GET</a>
+            </div>
+        </section>
+
+        <section id="apps">
+            <h2>Signed Apps</h2>
+            <p>‎ </p>
+            <div class="app-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Roblox_%282025%29_%28App_Icon%29.svg/960px-Roblox_%282025%29_%28App_Icon%29.svg.png" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">Delta</div>
+                    <p style="font-size: 0.8rem; color: #aaa;">Roblox Exploit</p>
+                </div>
+                <a href="itms-services://?action=download-manifest&url=https%3A%2F%2Fdeltaios-executor.com%2FInstall21.plist" target="_blank" class="get-btn">GET</a>
+            </div>
+        </section>
+
+          <section id="repo">
+            <h2>Repo</h2>
+            <p>‎ </p>
+                          <div class="app-card">
+                <img src="https://i.imgur.com/miq2AVV.png" class="app-icon">
+                <div class="app-details">
+                    <div class="app-name">TP67 Repo</div>
+                    <p style="font-size: 0.8rem; color: #b9b9b9ff;">Add to FlekSt0re</p>
+                </div>
+                <a href="https://stikstore.app/altdirect/?url=https://debugofthe67.github.io/TP67-Repo/repo.json" target="_blank" class="get-btn">ADD</a>
+            </div>
+            </section>
+    </main>
+
+         
+
+    <div class="nav-container">
+        <nav class="glass-nav">
+            <div class="nav-bubble"></div>
+            <a href="#esign" class="nav-link active">
+                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                ESign
+            </a>
+            <a href="#ksign" class="nav-link">
+              <svg viewBox="0 0 24 24"><path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4-3c-.83 0-1.5-.67-1.5-1.5S19.67 9 20.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                KSign
+            </a>
+            <a href="#apps" class="nav-link">
+                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                Signed App
+            </a>
+              <a href="#repo" class="nav-link">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                     <path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"/>
+                 </svg>
+                Repo
+            </a>
+            
+                
+            </a>
+        </nav>
+    </div>
+
+
+    <div id="ios-prompt">
+        <div class="prompt-card">
+            <h3 style="margin-bottom:15px">Install App</h3>
+            <p style="font-size:0.9rem; line-height:1.6; color:#ccc">
+                1. Open this page in Safari<br>
+                2. Click the "Share" button<br>
+                3. Choose "Add to Home Screen"
+            </p>
+            <button onclick="document.getElementById('ios-prompt').style.display='none'" style="margin-top:20px; background:none; border:none; color:var(--accent-color); font-weight:bold;">Continue With Browser
+        </button>
+        </div>
+    </div>
+
+    <script>
+        const links = document.querySelectorAll('.nav-link');
+        const bubble = document.querySelector('.nav-bubble');
+
+        function updateBubble() {
+            const activeLink = document.querySelector('.nav-link.active');
+            if (activeLink) {
+                const rect = activeLink.getBoundingClientRect();
+                const navRect = document.querySelector('.glass-nav').getBoundingClientRect();
+                
+                // Set the bubble width to the link's width and move it
+                bubble.style.width = `${rect.width}px`;
+                bubble.style.left = `${rect.left - navRect.left}px`;
+            }
+        }
+
+        links.forEach(link => {
+            link.addEventListener('click', (e) => {
+                links.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                updateBubble();
+            });
+        });
+
+        // Auto-detect section on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    const targetLink = document.querySelector(`.nav-link[href="#${id}"]`);
+                    if (targetLink) {
+                        links.forEach(l => l.classList.remove('active'));
+                        targetLink.classList.add('active');
+                        updateBubble();
+                    }
+                }
+            });
+        }, { threshold: 0.6 });
+
+        document.querySelectorAll('section').forEach(s => observer.observe(s));
+
+        // Initial setup
+        window.onload = updateBubble;
+        window.onresize = updateBubble;
+
+        // iOS Prompt Logic
+        const isIos = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.navigator.standalone;
+        if (isIos) { document.getElementById('ios-prompt').style.display = 'flex'; }
+    </script>
+</body>
+</html>
