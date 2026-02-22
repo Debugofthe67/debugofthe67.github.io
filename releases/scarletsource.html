@@ -31,6 +31,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            --success: #2ea043;
         }
 
         .container { width: 100%; max-width: 800px; }
@@ -38,6 +39,18 @@
         header { text-align: center; padding: 40px 0; }
         header h1 { font-size: 2.5rem; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; }
         header p { color: var(--text-dim); margin-top: 10px; }
+
+     /* Status Indicator */
+        .status-box {
+            background: rgba(46, 160, 67, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+            color: var(--success);
+        }
 
 
         /* Tabs */
@@ -107,6 +120,10 @@
             <p>DNS, DIRECT INSTALL, and more resources for sideloading with Scarlet</p>
         </header>
 
+         <div class="status-box" id="status-indicator">
+            <span id="status-dot">●</span> <strong>Status:</strong> Signed & Functional (Public Certificate)
+        </div>
+
         <nav class="tabs">
             <div class="tab active" onclick="switchTab(event, 'installers')">Installers</div>
             <div class="tab" onclick="switchTab(event, 'files')">Files & Repos</div>
@@ -163,6 +180,15 @@
             // Update sections
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             document.getElementById(sectionId).classList.add('active');
+        }
+                // Simulating a real-time status check
+        const isSigned = true; 
+        if(!isSigned) {
+            const statusBox = document.getElementById('status-indicator');
+            statusBox.style.borderColor = "#ff4757";
+            statusBox.style.color = "#ff4757";
+            statusBox.style.background = "rgba(255, 71, 87, 0.1)";
+            statusBox.innerHTML = "● <strong>Status:</strong> Revoked. Please use the Computer Method.";
         }
     </script>
 </body>
